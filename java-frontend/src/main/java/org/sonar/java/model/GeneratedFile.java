@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import javax.annotation.CheckForNull;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextPointer;
@@ -61,9 +62,9 @@ public class GeneratedFile implements InputFile {
     this.path = path;
   }
 
-  public SourceMap sourceMap() {
+  public SourceMap sourceMap(Function<Path, InputFile> fileResolver) {
     if (sourceMap == null) {
-      sourceMap = new SourceMapImpl();
+      sourceMap = new SourceMapImpl(fileResolver);
     }
     return sourceMap;
   }
@@ -80,12 +81,13 @@ public class GeneratedFile implements InputFile {
 
     final Map<Integer, Location> lines = new HashMap<>();
 
-    private SourceMapImpl() {
+    private SourceMapImpl(Function<Path, InputFile> fileResolver) {
       for (SmapFile sm : smapFiles) {
         for (SmapFile.LineInfo lineInfo : sm.getLineSection()) {
           for (int i = 0; i < lineInfo.repeatCount; i++) {
             int inputLine = lineInfo.inputStartLine + i;
-            Path inputFile = sm.getUriRoot().resolve(sm.getFileSection().get(lineInfo.lineFileId).sourcePath);
+            Path sourcePath = sm.getUriRoot().resolve(sm.getFileSection().get(lineInfo.lineFileId).sourcePath);
+            InputFile inputFile = fileResolver.apply(sourcePath);
             LocationImpl location = new LocationImpl(inputFile, inputLine, inputLine);
             int outputStart = lineInfo.outputStartLine + (i * lineInfo.outputLineIncrement);
             int outputEnd = lineInfo.outputStartLine + ((i + 1) * lineInfo.outputLineIncrement) - 1;
@@ -111,13 +113,13 @@ public class GeneratedFile implements InputFile {
         return Optional.empty();
       }
       int inputStartLine = startLoc.startLine();
-      Path startFile = startLoc.inputFile();
+      InputFile startFile = startLoc.inputFile();
       Location endLoc = lines.get(endLine);
       if (endLoc == null) {
         return Optional.empty();
       }
       int inputEndLine = endLoc.endLine();
-      Path endFile = endLoc.inputFile();
+      InputFile endFile = endLoc.inputFile();
       if (!startFile.equals(endFile)) {
         return Optional.empty();
       }
@@ -128,18 +130,18 @@ public class GeneratedFile implements InputFile {
 
   private static final class LocationImpl implements Location {
 
-    private final Path inputFile;
+    private final InputFile inputFile;
     private final int startLine;
     private final int endLine;
 
-    private LocationImpl(Path inputFile, int startLine, int endLine) {
+    private LocationImpl(InputFile inputFile, int startLine, int endLine) {
       this.inputFile = inputFile;
       this.startLine = startLine;
       this.endLine = endLine;
     }
 
     @Override
-    public Path inputFile() {
+    public InputFile inputFile() {
       return inputFile;
     }
 

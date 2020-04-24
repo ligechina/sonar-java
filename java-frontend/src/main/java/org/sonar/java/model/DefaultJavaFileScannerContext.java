@@ -207,7 +207,7 @@ public class DefaultJavaFileScannerContext implements JavaFileScannerContext {
   @Override
   public Optional<SourceMap> sourceMap() {
     if (inputFile instanceof GeneratedFile) {
-      return Optional.of(((GeneratedFile) inputFile).sourceMap());
+      return Optional.of(((GeneratedFile) inputFile).sourceMap(sonarComponents::findFileWithPath));
     }
     return Optional.empty();
   }

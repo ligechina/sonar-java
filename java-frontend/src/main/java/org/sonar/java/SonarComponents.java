@@ -26,6 +26,7 @@ import com.sonar.sslr.api.RecognitionException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -36,6 +37,7 @@ import javax.annotation.Nullable;
 import org.sonar.api.SonarProduct;
 import org.sonar.api.batch.ScannerSide;
 import org.sonar.api.batch.bootstrap.ProjectDefinition;
+import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputComponent;
 import org.sonar.api.batch.fs.InputFile;
@@ -327,6 +329,12 @@ public class SonarComponents {
   public InputComponent project() {
     // TODO to be changed to context.project() once LTS 7.x has been released
     return context.module();
+  }
+
+  @Nullable
+  public InputFile findFileWithPath(Path path) {
+    FilePredicates predicates = fs.predicates();
+    return fs.inputFile(predicates.hasPath(path.toString()));
   }
 
 }

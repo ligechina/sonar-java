@@ -257,7 +257,7 @@ public class DefaultJavaFileScannerContextTest {
   public void test_source_map() {
     GeneratedFile file = mock(GeneratedFile.class);
     SourceMap sourceMap = mock(SourceMap.class);
-    when(file.sourceMap()).thenReturn(sourceMap);
+    when(file.sourceMap(any())).thenReturn(sourceMap);
     DefaultJavaFileScannerContext ctx = new DefaultJavaFileScannerContext(compilationUnitTree, file, null, sonarComponents, new JavaVersionImpl(), true);
     assertThat(ctx.sourceMap().get()).isSameAs(sourceMap);
 

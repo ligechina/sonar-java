@@ -171,7 +171,7 @@ class JasperTest {
     Collection<GeneratedFile> generatedFiles = new Jasper().generateFiles(ctx, emptyList());
     assertThat(generatedFiles).hasSize(1);
     GeneratedFile generatedFile = generatedFiles.iterator().next();
-    assertThat(generatedFile.sourceMap()).isNotNull();
+    assertThat(generatedFile.sourceMap(p -> null)).isNotNull();
   }
 
   @Test
